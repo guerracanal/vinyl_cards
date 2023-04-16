@@ -1,0 +1,109 @@
+html {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+  }
+  
+  body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f5f5f5;
+  }
+  
+  h2 {
+    font-size: 2.5rem;
+    color: #1a237e;
+    margin: 2rem 0;
+  }
+  
+  
+  button {
+    display: inline-block;
+    background-color: #1a237e;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.75rem 1.5rem;
+    margin-top: 2rem;
+    transition: background-color 0.2s ease-in-out;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0d0f1c;
+  }
+  
+  input[type="text"] {
+    background-color: #ffffff;
+    color: #1a237e;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    margin-right: 1rem;
+    width: 50%;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  input[type="submit"] {
+    display: inline-block;
+    background-color: #1a237e;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1.5rem;
+    margin-top: 2rem;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  input[type="submit"]:hover {
+    background-color: #0d0f1c;
+  }
+
+  .radio-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+  }
+  
+  .radio {
+    margin: 1rem;
+  }
+  
+  .radio input[type="radio"] {
+    display: none;
+  }
+  
+  .radio label {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-position: center;
+    cursor: pointer;
+    background-size: 25px 25px;
+    opacity: 0.2; /* Establecemos la opacidad inicial a 0.2 */
+}
+
+.radio input[type="radio"]:checked + label {
+  opacity: 1; /* Cambiamos la opacidad a 1 cuando se selecciona el radio button */
+}
+  
+  
+  .radio input[type="radio"]:checked + label {
+    opacity: 1;
+  }
+  
+  .radio label img {
+    width: 25px;
+    height: 25px;
+  }
+  

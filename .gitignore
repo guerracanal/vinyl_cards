@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Flask
+*.pyc
+*.pyo
+__pycache__/
+env/
+instance/
+
+# Virtual environment
+venv/
+ENV/
+
+.env
+.chache
