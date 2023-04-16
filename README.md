@@ -13,7 +13,7 @@ Vinyl Cards was developed using Python and the following libraries:
 - PIL
 - skimage
 
-# Usage
+## Usage
 
 To use Vinyl Cards, follow these steps:
 
