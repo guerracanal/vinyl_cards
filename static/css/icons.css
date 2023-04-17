@@ -1,0 +1,21 @@
+
+.icons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+  }
+
+.icon {
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+    opacity: 0.8;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .icon:hover {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  

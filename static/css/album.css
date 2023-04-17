@@ -38,3 +38,33 @@
     color: #757575;
     margin: 0;
   }
+
+
+  /* Estilos para la capa transparente */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Opacidad del 50% */
+  z-index: 9999; /* Capa más alta */
+  display: none; /* Ocultar inicialmente */
+}
+
+/* Estilos para la ventana modal */
+#modal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000; /* Capa más alta que la capa transparente */
+  display: none; /* Ocultar inicialmente */
+}
+
+/* Estilos para el contenido de la ventana modal */
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+}

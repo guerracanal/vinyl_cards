@@ -169,6 +169,7 @@ def spotify_data_pull(album):
 
     r = requests.get(album_get.format(id=id), headers=headers)
     r = r.json()
+    print(r)
 
     playtime = 0
     for i in r['tracks']['items']:
