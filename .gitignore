@@ -20,4 +20,4 @@ venv/
 ENV/
 
 .env
-.chache
+.cache
