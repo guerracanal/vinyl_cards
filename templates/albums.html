@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Card Generator</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/album.css') }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='css/icons.css') }}" rel="stylesheet">
+
+
+        <meta charset="UTF-8">
+    </head>
+
+    <body>      
+        <h2>Spotify User Page {{ nombre_usuario }}</h2>
+        <br>
+    
+    <div class="album-grid">
+        {% for album in albums %}
+            <div class="album">
+                <a href="{{ url_for('card_result', album=album.album_link) }}">
+                    <img src="{{ album.album_art }}" alt="{{ album.album_name }}" onclick="showLoadingModal('{{ url_for('card_result', album=album.album_link)}}')">
+                </a>
+                <div class="icons">
+                    <a href="{{ url_for('card_result', album=album.album_link, icon='vinyl.jpg') }}" onclick="showLoadingModal('{{ url_for('card_result', album=album.album_link, icon='vinyl.jpg')}}')">
+                        <img src="{{ url_for('static', filename='images/vinyl.jpg') }}" alt="Vinyl" class="icon">
+                    </a>
+                    <a href="{{ url_for('card_result', album=album.album_link, icon='cd.jpg') }}" onclick="showLoadingModal('{{ url_for('card_result', album=album.album_link, icon='cd.jpg')}}')">
+                        <img src="{{ url_for('static', filename='images/cd.jpg') }}" alt="CD" class="icon">
+                    </a>
+                    <a href="{{ url_for('card_result', album=album.album_link, icon='cassette.jpg') }}" onclick="showLoadingModal('{{ url_for('card_result', album=album.album_link, icon='cassette.jpg')}}')">
+                        <img src="{{ url_for('static', filename='images/cassette.jpg') }}" alt="Cassette" class="icon">
+                    </a>
+                  </div>                  
+                <h3>{{ album.album_name }}</h3>
+                <p>{{ album.album_artist }}</p>
+            </div>
+        {% endfor %}
+    </div>      
+  </script>
+    </body>
+</html>

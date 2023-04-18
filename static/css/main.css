@@ -66,44 +66,4 @@ html {
   input[type="submit"]:hover {
     background-color: #0d0f1c;
   }
-
-  .radio-grid {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px;
-  }
-  
-  .radio {
-    margin: 1rem;
-  }
-  
-  .radio input[type="radio"] {
-    display: none;
-  }
-  
-  .radio label {
-    display: inline-block;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background-position: center;
-    cursor: pointer;
-    background-size: 25px 25px;
-    opacity: 0.2; /* Establecemos la opacidad inicial a 0.2 */
-}
-
-.radio input[type="radio"]:checked + label {
-  opacity: 1; /* Cambiamos la opacidad a 1 cuando se selecciona el radio button */
-}
-  
-  
-  .radio input[type="radio"]:checked + label {
-    opacity: 1;
-  }
-  
-  .radio label img {
-    width: 25px;
-    height: 25px;
-  }
   

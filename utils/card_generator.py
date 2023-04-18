@@ -315,7 +315,7 @@ def add_icon(image_file, right_logo, resolution, spacing):
 def add_icon_key(image_file, resolution, spacing):
     global card  # declare card as a global variable
 
-    image = cv2.imread(image_file)
+    image = cv2.imread("static/images/" + image_file)
     image = cv2.resize(image, (400, 400))  # replace with desired size
     
     image_x = resolution[1] - spacing - image.shape[1]

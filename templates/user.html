@@ -12,86 +12,11 @@
     <body>      
         <h2>Spotify User Page {{ nombre_usuario }}</h2>
         <br>
-        <br>
 
-        <div class="radio-grid">
-            <div class="radio">
-              <input type="radio" id="vinyl" name="icon" value="vinyl.jpg">
-              <label for="vinyl"><img src="{{ url_for('static', filename='images/vinyl.png') }}" alt="Vinyl"></label>
-            </div>
-            <div class="radio">
-              <input type="radio" id="cd" name="icon" value="cd.jpg">
-              <label for="cd"><img src="{{ url_for('static', filename='images/cd.png') }}" alt="CD"></label>
-            </div>
-            <div class="radio">
-              <input type="radio" id="cassette" name="icon" value="cassette.jpg">
-              <label for="cassette"><img src="{{ url_for('static', filename='images/cassette.png') }}" alt="Cassette"></label>
-            </div>
-            <div class="radio">
-                <input type="radio" id="none" name="icon" value="none" checked>
-                <label for="none"><img src="{{ url_for('static', filename='images/none.png') }}" alt="None"></label>
-            </div>
-          </div>
-
-        <form action="/albums" method="post">
-            <button type="submit">Saved Albums</button>
+        <form action="/albums" method="post" onsubmit="showLoadingModal(this.action); return true;">
+          <button type="submit">Saved Albums</button>
         </form>
-        
 
-             
-        <div class="album-grid">
-            {% for album in albums %}
-                <div class="album">
-                    <a href="#" onclick="event.preventDefault(); submitForm('{{ album.album_link }}')">
-                        <img src="{{ album.album_art }}" alt="{{ album.album_name }}">
-                    </a>
-                    <h3>{{ album.album_name }}</h3>
-                    <p>{{ album.album_artist }}</p>
-                </div>
-            {% endfor %}
-        </div>
 
-        <form id="album-form" action="/card" method="POST" style="display: none;">
-            <input id="album-input" name="album_input" value="">
-            <div class="icons">
-              <input type="radio" name="icon" value="vinyl.jpg" id="vinyl-icon" class="icon">
-              <label for="vinyl-icon">
-                <img src="{{ url_for('static', filename='vinyl.jpg') }}" alt="Vinyl" class="icon-image">
-              </label>
-              <input type="radio" name="icon" value="cd.jpg" id="cd-icon" class="icon">
-              <label for="cd-icon">
-                <img src="{{ url_for('static', filename='cd.jpg') }}" alt="CD" class="icon-image">
-              </label>
-              <input type="radio" name="icon" value="cassette.jpg" id="cassette-icon" class="icon">
-              <label for="cassette-icon">
-                <img src="{{ url_for('static', filename='cassette.jpg') }}" alt="Cassette" class="icon-image">
-              </label>
-            </div>
-          </form>
-          
-          
-        
-        <script>
-            function submitForm(albumLink) {
-                var form = document.getElementById('album-form');
-                var input = document.getElementById('album-input');
-                input.value = albumLink;
-                form.submit();
-            }
-        </script>
-        <script>
-            const radioButtons = document.querySelectorAll('input[type="radio"]');
-            const albumInput = document.getElementById('album-input');
-
-            radioButtons.forEach(button => {
-            button.addEventListener('change', (event) => {
-                if (event.target.checked) {
-                albumInput.value = event.target.value;
-                } else {
-                albumInput.value = "";
-                }
-            });
-            });
-        </script>
-    </body>
+</body>
 </html>

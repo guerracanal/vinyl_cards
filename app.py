@@ -20,12 +20,23 @@ def index():
 
 @app.route('/card', methods = ['POST', 'GET'])
 def card_result():
-    if request.method == 'POST':
-        album_link = request.form["album_input"]
-        icon = request.form.get("icon")  # obtener valor de checkbox
+    if request.method == 'GET':
+        album_link = request.args.get('album')
+        icon = request.args.get('icon')
+
+        if icon:
+            print("icon: " + icon)
+        else:
+            print("icon no definido")
+            
+        if album_link:
+            print("album: " + album_link)
+        else:
+            print("album no definido")
+
 
         resolution = (5040, 3600, 3)
-        card, album_name = generator(album_link, resolution, icon=icon)
+        card, album_name = generator(album_link, resolution, icon)
         card = Image.fromarray(card)
 
         card = card.resize((int(6.3/2.54*300), int(8.8/2.54*300)), resample=Image.LANCZOS)
@@ -69,8 +80,8 @@ def albums():
             album_dict['album_art'] = album['album_art']
             album_dict['album_link'] = album['album_link']
             albums.append(album_dict)
-        return render_template('user.html', albums=albums, nombre_usuario=nombre_usuario)
-    return render_template('user.html')
+        return render_template('albums.html', albums=albums, nombre_usuario=nombre_usuario)
+    return render_template('albums.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
