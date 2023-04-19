@@ -37,59 +37,6 @@
             </div>
         {% endfor %}
     </div>      
-
-    
-<!-- Capa transparente para bloquear la iteración con los elementos -->
-<div id="overlay"></div>
-
-<!-- Ventana modal -->
-<div id="modal">
-  <!-- Contenido de la ventana modal -->
-  <div class="modal-content">
-    <p>Cargando...</p>
-  </div>
-</div>
-  
-  <script>
- // Función para mostrar la ventana modal
-function showLoadingModal(url) {
-  // Mostrar la capa transparente y la ventana modal
-  $('#overlay').show();
-  $('#modal').show();
-
-  // Realizar petición Ajax
-  $.ajax({
-    url: url,
-    method: 'GET',
-    success: function(response) {
-      // Actualizar contenido de la ventana modal con el resultado
-      $('#modal .modal-content').html(response);
-
-      // Ocultar la capa transparente y la ventana modal después de unos segundos
-      setTimeout(function() {
-        $('#overlay').hide();
-        $('#modal').hide();
-      }, 3000);
-    },
-    error: function() {
-      // Mostrar mensaje de error en la ventana modal
-      $('#modal .modal-content').html('Error al cargar el archivo.');
-
-      // Ocultar la capa transparente y la ventana modal después de unos segundos
-      setTimeout(function() {
-        $('#overlay').hide();
-        $('#modal').hide();
-      }, 3000);
-    }
-  });
-}
-
-// Evento click para el botón de abrir la ventana modal
-$('#openModalBtn').on('click', function() {
-  showLoadingModal();
-});
-
-
   </script>
     </body>
 </html>

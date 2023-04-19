@@ -16,46 +16,6 @@
         <form action="/albums" method="post" onsubmit="showLoadingModal(this.action); return true;">
           <button type="submit">Saved Albums</button>
         </form>
-        
-
-      <!-- Ventana modal de carga -->
-<div class="modal" id="loadingModal">
-  <div class="modal-content">
-    <div class="loader"></div>
-    <p>Cargando...</p>
-  </div>
-</div>
-
-<script>
-function showLoadingModal(url) {
-  // Mostrar ventana modal de carga
-  $('#loadingModal').show();
-
-  // Realizar petición Ajax
-  $.ajax({
-    url: url,
-    method: 'GET',
-    success: function(response) {
-      // Actualizar contenido de la ventana modal con el resultado
-      $('#loadingModal').html(response);
-
-      // Ocultar ventana modal de carga
-      $('#loadingModal').hide();
-    },
-    error: function() {
-      // Mostrar mensaje de error en la ventana modal
-      $('#loadingModal').html('Error al cargar el archivo.');
-
-      // Ocultar ventana modal de carga después de unos segundos
-      setTimeout(function() {
-        $('#loadingModal').hide();
-      }, 3000);
-    }
-  });
-}
-
-
-</script>
 
 
 </body>
