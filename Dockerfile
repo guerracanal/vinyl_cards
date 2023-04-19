@@ -3,4 +3,5 @@ COPY . /app
 WORKDIR /app
 RUN apt-get update && \
     xargs -a packages.txt apt-get install -y
+RUN pip install -r requirements.txt
 CMD ["gunicorn", "--conf", "gunicorn_conf.py", "webapp:app"]
