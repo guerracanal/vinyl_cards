@@ -2,4 +2,5 @@ FROM python:3.8-slim-buster
 COPY . /app
 WORKDIR /app
 RUN apt-get install ffmpeg libsm6 libxext6 -y
+RUN apt-get install -y libgl1-mesa-glx
 CMD ["gunicorn", "--conf", "gunicorn_conf.py", "webapp:app"] 
