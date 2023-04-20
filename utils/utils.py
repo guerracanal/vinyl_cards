@@ -14,6 +14,8 @@ from spotipy.oauth2 import SpotifyOAuth
 import spotipy
 from flask import Flask, render_template, request, redirect, session
 import psutil
+import locale
+
 
 
 def get_albums():
@@ -35,10 +37,20 @@ def get_albums():
             album['album_artist'] = item['album']['artists'][0]['name']
             album['album_link'] = item['album']['external_urls']['spotify']
             album['album_art'] = item['album']['images'][0]['url']
-
+            album['album_date'] = get_date(item['album']['release_date'], '')
             albums.append(album)
         offset += limit
     return albums
+
+def get_date(date_input, lang):
+    try:
+        locale.setlocale(locale.LC_TIME, lang)
+        date = datetime.datetime.strptime(date_input.replace('-',''), r'%Y%m%d')
+        month = date.strftime("%b").capitalize()
+        date_format =  date.strftime(r'%d de {} de %Y').lstrip('0').format(month)
+    except ValueError:
+        return date_input
+    return date_format
 
 
 def get_user_spotify():
@@ -132,7 +144,8 @@ def get_saved_albums():
     for item in saved_albums_data['items']:
         album_name = item['album']['name']
         album_artist = item['album']['artists'][0]['name']
-        albums_list.append((album_name, album_artist))
+        album_date = item['release_date']
+        albums_list.append((album_name, album_artist, album_date))
 
     return albums_list
 
@@ -164,7 +177,6 @@ def spotify_data_pull(album):
     auth_response_data = auth_response.json()
     access_token = auth_response_data['access_token']
     headers = {
-        'Accept-Language': 'es',  # especifica el idioma deseado (español)
         'Authorization': 'Bearer {token}'.format(token=access_token)
     }
 
@@ -177,6 +189,22 @@ def spotify_data_pull(album):
     playtime = str(datetime.timedelta(seconds=playtime//1000))
     if playtime[0] == '0':
         playtime = playtime[2:]
+
+
+
+    playtime = 0
+    for i in r['tracks']['items']:
+        playtime += i['duration_ms']
+
+    playtime_seconds = playtime // 1000
+    minutes, seconds = divmod(playtime_seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+
+    if hours == 0:
+        playtime_formatted = f"{minutes}min"
+    else:
+        playtime_formatted = f"{hours}h {minutes}min"
+        
     
     tracks = []
     for i, track in enumerate(r['tracks']['items']):
@@ -192,17 +220,21 @@ def spotify_data_pull(album):
     data.update({'album_name': r['name']})
     data.update({'album_artist': r['artists'][0]['name']})
     data.update({'record' : r['label']})
-    data.update({'playtime' : playtime})
+    data.update({'playtime' : playtime_formatted})
     data.update({'tracks' : tracks})
     data.update({'album_art': album_art})
     data.update({'album_type': r['album_type']})
     data.update({'total_tracks': r['total_tracks']})
+    data.update({'label_tracks': 'canciones'})
     data.update({'type': r['type']})
     data.update({'copyright': r['copyrights'][0]['text']})
-    try:
-        data.update({'release_date' : datetime.datetime.strptime(r['release_date'].replace('-',''), r'%Y%m%d').strftime(r'%B %d, %Y')})
-    except ValueError:
-        data.update({'release_date' : r['release_date']})
+    data.update({'release_date' : get_date(r['release_date'], '')})
+    
+    #try:
+    #    data.update({'release_date' : datetime.datetime.strptime(r['release_date'].replace('-',''), r'%Y%m%d').strftime(r'%B %d, %Y')})
+    #except ValueError:
+    #    data.update({'release_date' : r['release_date']})
+    
     return data
 
 def rounded_rectangle(src, top_left, bottom_right, radius=1, color=255, thickness=1, line_type=cv2.LINE_AA):

@@ -79,6 +79,7 @@ def albums():
             album_dict['album_artist'] = album['album_artist']
             album_dict['album_art'] = album['album_art']
             album_dict['album_link'] = album['album_link']
+            album_dict['album_date'] = album['album_date']
             albums.append(album_dict)
         return render_template('albums.html', albums=albums, nombre_usuario=nombre_usuario)
     return render_template('albums.html')

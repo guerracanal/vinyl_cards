@@ -34,7 +34,8 @@ def generator(album, resolution, icon):
         icon_image = None
         
     # Crear y posicionar el arte del album
-    album_art = pil_process_album_art(data, resolution, spacing)
+    print("Art: " + data['album_art'])
+    album_art = pil_process_album_art(data['album_art'], resolution, spacing)
     add_album_art_to_card(album_art, resolution, spacing)
     
     # update y position for next element
@@ -61,7 +62,7 @@ def generator(album, resolution, icon):
     # update y position for next element
     y_position += 2*spacing
     
-    text =  data['release_date'] + ' - ' + str(data['total_tracks']) + ' tracks  (' +  data['playtime'] + ')'
+    text =  data['release_date'] + ' - ' + str(data['total_tracks']) + ' (' +  data['playtime'] + ')'
     add_details_to_card(text, resolution, y_position + 10, spacing)
     
     # update y position for next element
@@ -86,11 +87,11 @@ def generator(album, resolution, icon):
 
     return(card, album_name)
 
-def pil_process_album_art(data, resolution, spacing):
+def pil_process_album_art(album, resolution, spacing):
     global card  # declare card as a global variable
     
     # Download the image directly to memory using BytesIO
-    response = requests.get(data['album_art'])
+    response = requests.get(album)
     image = Image.open(BytesIO(response.content))
 
     # Convert to OpenCV format
@@ -168,7 +169,7 @@ def add_title_to_card(text, resolution, y_position, spacing):
     font_scale = 0
     font_scale_factor = 5
     thickness = 15
-    font_scale, textsize = get_font_scale(text, resolution, spacing, font_scale_factor, thickness, 120)
+    font_scale, textsize = get_font_scale(text, resolution, spacing, font_scale_factor, thickness, 110)
 
     print('title:' + str(font_scale))    
     # Calculate x position to center text horizontally
@@ -180,7 +181,7 @@ def add_title_to_card(text, resolution, y_position, spacing):
 def add_subtitle_to_card(text, resolution, y_position, spacing):
     global card  # declare card as a global variable
     font_scale = 0
-    font_scale_factor = 3
+    font_scale_factor = 4
     thickness = 10
 
     font_scale, textsize = get_font_scale(text, resolution, spacing, font_scale_factor, thickness, 110)
@@ -418,9 +419,9 @@ def process_text(text):
     text = text.encode('unicode_escape').decode('utf-8')
     text = remove_additions(text)
     print(text)
-    if len(text) > 40:
+    if len(text) > 30:
         print(len(text))
-        return text[:40] + "..."
+        return text[:30] + "..."
     return text
 
 if __name__ == '__main__':
