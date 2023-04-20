@@ -164,13 +164,12 @@ def spotify_data_pull(album):
     auth_response_data = auth_response.json()
     access_token = auth_response_data['access_token']
     headers = {
+        'Accept-Language': 'es',  # especifica el idioma deseado (español)
         'Authorization': 'Bearer {token}'.format(token=access_token)
     }
 
     r = requests.get(album_get.format(id=id), headers=headers)
     r = r.json()
-    print(r)
-
     playtime = 0
     for i in r['tracks']['items']:
         playtime += i['duration_ms']
@@ -185,7 +184,6 @@ def spotify_data_pull(album):
             tracks.append("and more...")
             break
         tracks.append(track['name'])
-
     
     album_art = r['images'][0]['url']
 
