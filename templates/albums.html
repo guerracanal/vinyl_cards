@@ -1,15 +1,6 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Card Generator</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
-        <link href="{{ url_for('static', filename='css/album.css') }}" rel="stylesheet">
-        <link href="{{ url_for('static', filename='css/icons.css') }}" rel="stylesheet">
 
-
-        <meta charset="UTF-8">
-    </head>
+{% extends "layout.html" %}
+{% block body %}
 
     <body>      
         <h2>Spotify User Page {{ nombre_usuario }}</h2>
@@ -37,6 +28,7 @@
             </div>
         {% endfor %}
     </div>      
-  </script>
-    </body>
-</html>
+
+    
+    
+{% endblock %}

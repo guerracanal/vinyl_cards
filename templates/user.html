@@ -1,22 +1,10 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Card Generator</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
-        <link href="{{ url_for('static', filename='css/album.css') }}" rel="stylesheet">
 
-        <meta charset="UTF-8">
-    </head>
-
-    <body>      
+        {% extends "layout.html" %}
+        {% block body %}
         <h2>Spotify User Page {{ nombre_usuario }}</h2>
         <br>
 
         <form action="/albums" method="post" onsubmit="showLoadingModal(this.action); return true;">
           <button type="submit">Saved Albums</button>
         </form>
-
-
-</body>
-</html>
+        {% endblock %}
