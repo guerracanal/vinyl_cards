@@ -4,3 +4,5 @@ env:
   PORT: 8080
 build:
   dockerfile: Dockerfile
+run:
+  web: gunicorn --config gunicorn_conf.py webapp:app
