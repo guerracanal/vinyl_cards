@@ -27,9 +27,31 @@ def generator(album, resolution, icon):
     card = np.ones(resolution, np.uint8)
     card = card*255
 
+    # define el color de fondo en función del valor de data['album_type']
+    if data['album_type'] == 'single':
+        #LightSkyBlue
+        #87CEFA
+        #rgb(135, 206, 250)
+        color = (250, 206, 135)  #LightSkyBlue
+    
+    elif data['album_type'] == 'compilation':
+        #LightGoldenRodYellow
+        #FAFAD2
+        #rgb(250, 250, 210)
+        color = (210, 250, 250)  #LightGoldenRodYellow
+    else:
+        #Snow
+        #FFFAFA
+        #rgb(255, 250, 250)
+        color = (250, 250, 255)  # blanco por defecto
+
+    # asigna el color de fondo a la matriz
+    #card = cv2.cvtColor(card, cv2.COLOR_GRAY2BGR)
+    card[:] = color
+
+
     if icon is not None:
-        print(icon)
-        icon_image = add_icon_key(icon, resolution, spacing)
+        icon_image = add_icon_png(icon, resolution, spacing)
     else:
         icon_image = None
         
@@ -40,9 +62,7 @@ def generator(album, resolution, icon):
     
     # update y position for next element
     y_position += album_art.shape[0] + 3*spacing
-    
-    print('y_position: ' + str(y_position))
-    
+        
     text_box_position = 4000
     add_horizontal_line(album_art.shape[0] + 100, text_box_position - 4*spacing, album_art)
     #add_horizontal_black_lines(album_art.shape[0] + 100, text_box_position - 4*spacing)
@@ -50,7 +70,6 @@ def generator(album, resolution, icon):
     y_position = text_box_position
 
     album_name = process_text(data['album_name'])
-    print(album_name)
     add_title_to_card(album_name, resolution, y_position, spacing)
     
     # update y position for next element
@@ -62,14 +81,14 @@ def generator(album, resolution, icon):
     # update y position for next element
     y_position += 2*spacing
     
-    text =  data['release_date'] + ' - ' + str(data['total_tracks']) + ' (' +  data['playtime'] + ')'
+    text =  data['release_date'] + ' - ' +  data['playtime'] + ' (' + str(data['total_tracks']) + ')'
     add_details_to_card(text, resolution, y_position + 10, spacing)
     
     # update y position for next element
     y_position += spacing
     
     #logo = add_spotify_logo(card, resolution, spacing)
-    add_spotify_code(album, resolution, spacing)
+    add_spotify_code(album, data['album_type'], resolution, spacing)
 
     # add border to card with colors of album art
     add_border_to_card(album_art)
@@ -329,7 +348,7 @@ def add_black_border_to_card(round_corners=False):
     else:
         cv2.rectangle(card, (border_width, border_width), (card.shape[1] - border_width, card.shape[0] - border_width), (0, 0, 0), thickness)
 
-def add_spotify_code(album, resolution, spacing):
+def add_spotify_code(album, type, resolution, spacing):
     global card  # declare card as a global variable
 
     album_url_base = r'https://open.spotify.com/album/'
@@ -337,8 +356,17 @@ def add_spotify_code(album, resolution, spacing):
         album = album[:album.find('?')]
     id = album[album.find(album_url_base)+len(album_url_base):]
 
+    if type == "album":
+        color = "fffafa"
+    elif type == "single":
+        color = "87cefa"
+    elif type == "compilation":
+        color = "fafad2"
+    else:
+        return None
+
     # https://scannables.scdn.co/uri/plain/[format]/[background-color-in-hex]/[code-color-in-text]/[size]/[spotify-URI]
-    url = 'https://scannables.scdn.co/uri/plain/png/ffffff/black/640/spotify:album:' + id
+    url = 'https://scannables.scdn.co/uri/plain/png/'+ color + '/black/640/spotify:album:' + id
 
     response = requests.get(url)
     img_array = np.array(bytearray(response.content), dtype=np.uint8)
@@ -375,6 +403,27 @@ def add_icon_key(image_file, resolution, spacing):
 
     # add the image to the bottom right corner of the card
     card[image_y:image_y+image.shape[0], image_x:image_x+image.shape[1]] = image
+    
+    return image_x
+
+def add_icon_png(image_file, resolution, spacing):
+    global card  # declare card as a global variable
+
+    image = cv2.imread("static/images/" + image_file, cv2.IMREAD_UNCHANGED)
+    image = cv2.resize(image, (400, 400))  # replace with desired size
+    
+    image_x = resolution[1] - spacing - image.shape[1]
+    image_y = resolution[0] - spacing - image.shape[0]
+
+    if image.shape[2] == 4:  # check if image has alpha channel
+        alpha = image[:,:,3]
+        # blend image with transparency onto card
+        for c in range(0, 3):
+            card[image_y:image_y+image.shape[0], image_x:image_x+image.shape[1], c] = (
+                alpha/255.0 * image[:,:,c] + (1 - alpha/255.0) * card[
+                    image_y:image_y+image.shape[0], image_x:image_x+image.shape[1], c])
+    else:  # image does not have alpha channel
+        card[image_y:image_y+image.shape[0], image_x:image_x+image.shape[1]] = image[:,:,0:3]
     
     return image_x
     
@@ -415,12 +464,9 @@ def remove_special_characters(text):
     return text
 
 def process_text(text):
-    print(text)
     text = text.encode('unicode_escape').decode('utf-8')
     text = remove_additions(text)
-    print(text)
     if len(text) > 30:
-        print(len(text))
         return text[:30] + "..."
     return text
 

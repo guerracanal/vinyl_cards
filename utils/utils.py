@@ -10,15 +10,14 @@ import datetime
 import base64
 
 from urllib.parse import urlencode
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 import spotipy
 from flask import Flask, render_template, request, redirect, session
 import psutil
 import locale
 
 
-
-def get_albums():
+def get_my_albums():
     sp = spotipy.Spotify(auth=session.get('token'))
     limit = 20  # establece el número máximo de álbumes que se devolverán en una única llamada a la API
     offset = 0  # establece el número de álbumes que se deben omitir antes de comenzar a devolver resultados
@@ -32,25 +31,189 @@ def get_albums():
             # no hay más resultados, se detiene el ciclo
             break
         for item in results['items']:
+
+            item = item['album']
+
+            total_tracks = 0
+            try:
+                tracks = item['tracks']['items']
+                total_tracks = item['total_tracks']
+                if total_tracks > 50:
+                    tracks = get_all_tracks(item['id'])
+            except KeyError:
+                tracks = []
+                total_tracks = 0
+
             album = {}
-            album['album_name'] = item['album']['name']
-            album['album_artist'] = item['album']['artists'][0]['name']
-            album['album_link'] = item['album']['external_urls']['spotify']
-            album['album_art'] = item['album']['images'][0]['url']
-            album['album_date'] = get_date(item['album']['release_date'], '')
+            album['album_id'] = item['id']
+            album['album_name'] = item['name']
+            album['album_artist'] = item['artists'][0]['name']
+            album['album_link'] = item['external_urls']['spotify']
+            album['album_art'] = item['images'][0]['url']
+            album['album_date'] = get_date(item['release_date'], '')
+            album['playtime'] = get_playtime(tracks)
+            album['total_tracks'] = item['total_tracks']
+            album['album_type'] = item['album_type']
             albums.append(album)
         offset += limit
     return albums
+
+def get_albums(artist):
+    sp = get_spotify()
+
+    limit = 20  # establece el número máximo de álbumes que se devolverán en una única llamada a la API
+    offset = 0  # establece el número de álbumes que se deben omitir antes de comenzar a devolver resultados
+
+    items = []
+    albums = []  # lista para almacenar los álbumes
+
+    try:
+        # busca el artista en Spotify
+        artist_info = sp.search(q='artist:' + artist, type='artist')
+        artist_id = artist_info['artists']['items'][0]['id']
+    except (spotipy.SpotifyException, IndexError) as e:
+        print(f"No se pudo obtener información del artista {artist}: {e}")
+        return []
+
+    # ciclo para obtener los álbumes en bloques de 20
+    while True:
+        try:
+            # obtener los álbumes del artista actual en el offset actual
+            results = sp.artist_albums(artist_id, album_type='album,single', country='US', limit=limit, offset=offset)
+        except spotipy.SpotifyException as e:
+            print(f"No se pudieron obtener los álbumes de {artist}: {e}")
+            return albums
+
+        items_results = results['items']
+        items.extend(items_results)
+        offset += limit  # Avanzar al siguiente conjunto de resultados
+
+        # detener el ciclo si no hay más resultados
+        if results['next'] is None:
+            break
+
+    # obtener información adicional para cada álbum
+    for item in items:
+        try:
+            album = {}
+            album_info = sp.album(item['id'])
+
+            total_tracks = 0
+            try:
+                tracks = album_info['tracks']['items']
+                total_tracks = album_info['total_tracks']
+                if total_tracks > 50:
+                    tracks = get_all_tracks(album_info['id'])
+            except KeyError as e:
+                tracks = []
+                total_tracks = 0
+                print(e)
+
+            album['album_id'] = album_info['id']
+            album['album_name'] = album_info['name']
+            album['album_artist'] = album_info['artists'][0]['name']
+            album['album_link'] = album_info['external_urls']['spotify']
+            album['album_art'] = album_info['images'][0]['url']
+            album['album_date'] = get_date(album_info['release_date'], '')
+            album['playtime'] = get_playtime(tracks)
+            album['total_tracks'] = album_info['total_tracks']
+            album['album_type'] = album_info['album_type']
+            # añadir más campos según tus necesidades
+            albums.append(album)
+
+        except spotipy.SpotifyException as e:
+            print(f"No se pudo obtener información adicional para el álbum {album['name']}: {e}")
+
+    return albums
+
+def get_artist_albums(artist_name):
+    sp = spotipy.Spotify(auth=session.get('token'))
+    artist = sp.search(q='artist:' + artist_name, type='artist')
+    if not artist['artists']['items']:
+        return []
+    artist_id = artist['artists']['items'][0]['id']
+    albums = []
+    results = sp.artist_albums(artist_id, album_type='album,single', country='US')
+    albums.extend(results['items'])
+    while results['next']:
+        results = sp.next(results)
+        albums.extend(results['items'])
+    return albums
+
 
 def get_date(date_input, lang):
     try:
         locale.setlocale(locale.LC_TIME, lang)
         date = datetime.datetime.strptime(date_input.replace('-',''), r'%Y%m%d')
-        month = date.strftime("%b").capitalize()
-        date_format =  date.strftime(r'%d de {} de %Y').lstrip('0').format(month)
+        #month = date.strftime("%b").capitalize()
+        day = date.strftime("%d").lstrip('0')
+        month = date.strftime("%d").lstrip('0')
+        #date_format =  date.strftime(r'%d de {} de %Y').lstrip('0').format(month)
+        date_format = date.strftime(r'{}/{}/%Y').lstrip('0').format(day, month)
     except ValueError:
         return date_input
     return date_format
+
+def ms_to_hhmm(duration_ms):
+    duration_seconds = duration_ms // 1000
+    duration = datetime.timedelta(seconds=duration_seconds)
+    hhmm = str(duration).split('.')[0]  # extract the hh:mm part
+    return hhmm
+
+
+def get_playtime_old(tracks):
+
+    playtime = 0
+    for i in tracks:
+        playtime += i['duration_ms']
+
+    playtime = str(datetime.timedelta(seconds=playtime//1000))
+    if playtime[0] == '0':
+        playtime = playtime[2:]
+    return playtime
+
+def get_playtime(tracks):
+    
+    playtime = 0
+    for i in tracks:
+        playtime += i['duration_ms']
+
+    playtime_seconds = playtime // 1000
+    minutes, seconds = divmod(playtime_seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+
+    if hours == 0:
+        return f"{minutes} min"
+    else:
+        return f"{hours} h {minutes} min"
+    
+def get_playtime_pro(tracks):
+    sp = spotipy.Spotify(auth=session.get('token'))
+    playtime_ms = 0
+    total_tracks = len(tracks)
+    
+    # handle playlists with more than 50 tracks
+    if total_tracks > 50:
+        #sp = spotipy.Spotify(auth=token)
+        offset = 0
+        while offset < total_tracks:
+            results = sp.tracks(tracks[offset:offset+50])
+            for track in results['tracks']:
+                playtime_ms += track['duration_ms']
+            offset += 50
+    else:
+        for track in tracks:
+            playtime_ms += track['duration_ms']
+    
+    playtime_seconds = playtime_ms // 1000
+    minutes, seconds = divmod(playtime_seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    
+    if hours == 0:
+        return f"{minutes} min"
+    else:
+        return f"{hours} h {minutes} min"
+
 
 
 def get_user_spotify():
@@ -81,8 +244,16 @@ def login_spotify():
     sp_oauth = SpotifyOAuth(client_id=os.getenv('SPOTIFY_ID'), client_secret=os.getenv('SPOTIFY_SECRET'),
                             redirect_uri=os.getenv('SPOTIFY_REDIRECT_URI'), scope='user-library-read')
     auth_url = sp_oauth.get_authorize_url()
-    print(auth_url)
     return auth_url
+
+def get_spotify():
+    load_dotenv()
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+        client_id=os.getenv('SPOTIFY_ID'),
+        client_secret=os.getenv('SPOTIFY_SECRET'),
+        redirect_uri=os.getenv('SPOTIFY_REDIRECT_URI'),
+        scope='user-library-read'))
+    return sp
 
 def get_auth_url():
     load_dotenv()
@@ -151,7 +322,7 @@ def get_saved_albums():
 
 
 
-def spotify_data_pull(album):
+def spotify_data_pull_old(album):
     get_auth_url()
 
     load_dotenv()
@@ -164,9 +335,6 @@ def spotify_data_pull(album):
     if "?" in album:
         album = album[:album.find('?')]
     id = album[album.find(album_url_base)+len(album_url_base):]
-
-    print(album)
-    print(id)
 
     auth_response = requests.post(AUTH_URL, {
     'grant_type': 'client_credentials',
@@ -182,30 +350,7 @@ def spotify_data_pull(album):
 
     r = requests.get(album_get.format(id=id), headers=headers)
     r = r.json()
-    playtime = 0
-    for i in r['tracks']['items']:
-        playtime += i['duration_ms']
-
-    playtime = str(datetime.timedelta(seconds=playtime//1000))
-    if playtime[0] == '0':
-        playtime = playtime[2:]
-
-
-
-    playtime = 0
-    for i in r['tracks']['items']:
-        playtime += i['duration_ms']
-
-    playtime_seconds = playtime // 1000
-    minutes, seconds = divmod(playtime_seconds, 60)
-    hours, minutes = divmod(minutes, 60)
-
-    if hours == 0:
-        playtime_formatted = f"{minutes}min"
-    else:
-        playtime_formatted = f"{hours}h {minutes}min"
         
-    
     tracks = []
     for i, track in enumerate(r['tracks']['items']):
         if i == 30:
@@ -220,7 +365,7 @@ def spotify_data_pull(album):
     data.update({'album_name': r['name']})
     data.update({'album_artist': r['artists'][0]['name']})
     data.update({'record' : r['label']})
-    data.update({'playtime' : playtime_formatted})
+    data.update({'playtime' : get_playtime(r['tracks']['items'])})
     data.update({'tracks' : tracks})
     data.update({'album_art': album_art})
     data.update({'album_type': r['album_type']})
@@ -229,13 +374,82 @@ def spotify_data_pull(album):
     data.update({'type': r['type']})
     data.update({'copyright': r['copyrights'][0]['text']})
     data.update({'release_date' : get_date(r['release_date'], '')})
-    
-    #try:
-    #    data.update({'release_date' : datetime.datetime.strptime(r['release_date'].replace('-',''), r'%Y%m%d').strftime(r'%B %d, %Y')})
-    #except ValueError:
-    #    data.update({'release_date' : r['release_date']})
-    
+        
     return data
+
+def spotify_data_pull(album):
+    get_auth_url()
+
+    load_dotenv()
+    SPOTIFY_SECRET = os.getenv('SPOTIFY_SECRET')
+    SPOTIFY_ID = os.getenv('SPOTIFY_ID')
+    album_url_base = r'https://open.spotify.com/album/'
+    AUTH_URL = r'https://accounts.spotify.com/api/token'
+    album_get = 'https://api.spotify.com/v1/albums/{id}'
+
+    if "?" in album:
+        album = album[:album.find('?')]
+    id = album[album.find(album_url_base)+len(album_url_base):]
+
+    auth_response = requests.post(AUTH_URL, {
+    'grant_type': 'client_credentials',
+    'client_id': SPOTIFY_ID,
+    'client_secret': SPOTIFY_SECRET,
+    })
+
+    auth_response_data = auth_response.json()
+    access_token = auth_response_data['access_token']
+    headers = {
+        'Authorization': 'Bearer {token}'.format(token=access_token)
+    }
+
+    r = requests.get(album_get.format(id=id), headers=headers)
+    r = r.json()
+    
+    tracks = r['tracks']['items']
+    total_tracks = r['total_tracks']
+    if total_tracks > 50:
+        tracks = get_all_tracks(id)
+
+    tracks_info = []
+    for i, track in enumerate(r['tracks']['items']):
+        if i == 30:
+            tracks_info.append("and more...")
+            break
+        tracks_info.append(track['name'])
+    
+    album_art = r['images'][0]['url']
+
+    data = {}
+    data.update({'album_name': r['name']})
+    data.update({'album_artist': r['artists'][0]['name']})
+    data.update({'record' : r['label']})
+    data.update({'playtime' : get_playtime(tracks)})
+    data.update({'tracks' : tracks_info})
+    data.update({'album_art': album_art})
+    data.update({'album_type': r['album_type']})
+    data.update({'total_tracks': total_tracks})
+    data.update({'label_tracks': 'canciones'})
+    data.update({'type': r['type']})
+    #data.update({'copyright': r['copyrights'][0]['text']})
+    data.update({'release_date' : get_date(r['release_date'], '')})
+        
+    return data
+
+def get_all_tracks(album_id):
+    sp = spotipy.Spotify(auth=session.get('token'))
+
+    results = sp.album_tracks(album_id, limit=50)
+    tracks = results['items']
+
+    while results['next']:
+        results = sp.next(results)
+        tracks.extend(results['items'])
+
+    return tracks
+
+
+
 
 def rounded_rectangle(src, top_left, bottom_right, radius=1, color=255, thickness=1, line_type=cv2.LINE_AA):
 
@@ -291,11 +505,9 @@ def rounded_rectangle(src, top_left, bottom_right, radius=1, color=255, thicknes
 
 
 def font_scale_finder(text, scale, limit, thickness):
-    print(text)
     for i in range(200, 50, -5):
         i = i/100
         textsize = cv2.getTextSize(text, cv2.FONT_HERSHEY_TRIPLEX, i*scale, thickness*scale)
-        print(textsize[0][0])
         if textsize[0][0] <= limit*scale:
             return i
 

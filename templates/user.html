@@ -4,7 +4,6 @@
         <h2>Spotify User Page {{ nombre_usuario }}</h2>
         <br>
 
-        <form action="/albums" method="post" onsubmit="showLoadingModal(this.action); return true;">
-          <button type="submit">Saved Albums</button>
-        </form>
+        <a href="/my-albums">Saved Albums</a>
+
         {% endblock %}
