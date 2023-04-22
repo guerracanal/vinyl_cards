@@ -13,6 +13,9 @@ load_dotenv()
 app = Flask(__name__, instance_relative_config=True)
 app.config["SECRET_KEY"]=os.getenv('FLASK_SECRET')
 
+
+
+
 @app.route('/')
 def index():
         return render_template('mainpage.html', PageTitle="Vinyl Card Generator")
@@ -107,6 +110,8 @@ def albums_artist(artist):
             album_dict['total_tracks'] = album['total_tracks']
             album_dict['playtime'] = album['playtime']
             album_dict['album_type'] = album['album_type']
+            album_dict['popularity'] = album['popularity']
+            print(album['popularity'])
             albums.append(album_dict)
      
         type = request.args.get('type')
@@ -115,6 +120,10 @@ def albums_artist(artist):
 
     return render_template('albums.html', albums=albums)
 
+@app.errorhandler(Exception)
+def handle_error(e):
+    logging.error(f"Unhandled exception: {e}")
+    return "An error occurred.", 500
 
 
 if __name__ == '__main__':

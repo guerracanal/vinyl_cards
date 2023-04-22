@@ -118,6 +118,7 @@ def get_albums(artist):
             album['playtime'] = get_playtime(tracks)
             album['total_tracks'] = album_info['total_tracks']
             album['album_type'] = album_info['album_type']
+            album['popularity'] = album_info['popularity']
             # añadir más campos según tus necesidades
             albums.append(album)
 
@@ -433,6 +434,7 @@ def spotify_data_pull(album):
     data.update({'type': r['type']})
     #data.update({'copyright': r['copyrights'][0]['text']})
     data.update({'release_date' : get_date(r['release_date'], '')})
+
         
     return data
 

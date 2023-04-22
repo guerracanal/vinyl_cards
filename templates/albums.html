@@ -9,6 +9,7 @@
     <div class="album-grid">
         {% for album in albums %}
             <div class="album {{ album.album_type }}">
+                <span>{{ album.popularity }}</span>
                 <a href="{{ url_for('card_result', album=album.album_link) }}">
                     <img src="{{ album.album_art }}" alt="{{ album.album_name }}" onclick="showLoadingModal('{{ url_for('card_result', album=album.album_link)}}')">
                 </a>
