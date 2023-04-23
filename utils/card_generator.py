@@ -10,6 +10,8 @@ import time
 import psutil
 from io import BytesIO
 
+from utils.utils import spotify_data_pull
+
 
 card = None
 
@@ -85,7 +87,9 @@ def generator(album, resolution, icon):
     add_details_to_card(text, resolution, y_position + 10, spacing)
     
     # update y position for next element
-    y_position += spacing
+    y_position += 4*spacing
+
+    add_populaty_to_card(data['popularity'], resolution, y_position + 10, spacing)
     
     #logo = add_spotify_logo(card, resolution, spacing)
     add_spotify_code(album, data['album_type'], resolution, spacing)
@@ -96,6 +100,8 @@ def generator(album, resolution, icon):
     
     # update y position for next element
     y_position += 1*spacing
+
+    #add_popularity(data['popularity'], resolution, y_position, spacing)
     
     #add_tracks_album_to_card(card, resolution, y_position, spacing)
         
@@ -227,6 +233,22 @@ def add_details_to_card(text, resolution, y_position, spacing):
 
     cv2.putText(card, text, (x_position, y_position), cv2.FONT_HERSHEY_COMPLEX, font_scale, (0,0,0), thickness)
 
+def add_populaty_to_card(popularity, resolution, y_position, spacing):
+    global card  # asegurarse de que estás usando la variable global
+
+    #text = get_popularity_level(popularity)
+
+    font_scale_factor = 5
+    thickness = 2
+
+    font_scale, textsize = get_font_scale(popularity, resolution, spacing, font_scale_factor, thickness, 200)
+
+    print('populairty:' + popularity)
+
+    text_width = textsize[0][0]
+    x_position = spacing  # establecer el valor de x_position al margen izquierdo de la imagen
+
+    cv2.putText(card, popularity, (x_position, y_position), cv2.FONT_HERSHEY_COMPLEX, font_scale, (0, 0, 0), thickness)
 
 def add_horizontal_line(y_start, y_end, album_art):
     global card  # declare card as a global variable
@@ -470,6 +492,34 @@ def process_text(text):
         return text[:30] + "..."
     return text
 
+
+
+
+def add_popularity(popularity, resolution, y_position, spacing):
+    global card  # asegurarse de que estás usando la variable global
+    
+    # crear un objeto de dibujo para la imagen
+    draw = ImageDraw.Draw(Image.fromarray(card))
+    
+    # cargar la fuente y el tamaño del texto
+    font = ImageFont.truetype('arial.ttf', 24)
+    
+    # convertir la popularidad a una cadena de texto
+    text = str(popularity)
+    
+    # determinar el ancho y la altura del texto
+    text_width, text_height = draw.textsize(text, font=font)
+    
+    # calcular la posición del texto
+    x_position = spacing
+    y_position -= text_height + spacing
+    
+    # dibujar un rectángulo negro detrás del texto
+    draw.rectangle((x_position, y_position + text_height, x_position + text_width, y_position), fill=(0, 0, 0))
+    
+    # escribir el texto en el rectángulo
+    draw.text((x_position, y_position), text, font=font, fill=(255, 255, 255))
+
 if __name__ == '__main__':
 
     album = input("Enter Spotify Album link: ")
@@ -488,7 +538,7 @@ if __name__ == '__main__':
         resolution = list(map(int, resolution.strip().split(',')))
         resolution.append(3)
 
-    card, album_name = generator(album, resolution)
+    card, album_name = generator(album, resolution, None)
 
     album_name = remove_special_characters(album_name)
 

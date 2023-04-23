@@ -10,7 +10,16 @@ html {
     align-items: center;
     min-height: 100vh;
     background-color: #f5f5f5;
+    padding: 100px;
   }
+
+  div#loading {
+    width: 500px;
+    height: 500px;
+    display: none;
+    background: url(/static/images/loader.gif) no-repeat;
+    cursor: wait;
+    }
   
   h2 {
     font-size: 2.5rem;

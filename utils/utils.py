@@ -1,4 +1,3 @@
-
 import cv2
 import numpy as np
 import scipy.cluster
@@ -27,6 +26,7 @@ def get_my_albums():
     # ciclo para obtener los álbumes en bloques de 20
     while True:
         results = sp.current_user_saved_albums(limit=limit, offset=offset)
+        print(results['href'])
         if not results['items']:
             # no hay más resultados, se detiene el ciclo
             break
@@ -54,6 +54,7 @@ def get_my_albums():
             album['playtime'] = get_playtime(tracks)
             album['total_tracks'] = item['total_tracks']
             album['album_type'] = item['album_type']
+            album['popularity'] = get_popularity_level(item['popularity'])
             albums.append(album)
         offset += limit
     return albums
@@ -70,7 +71,9 @@ def get_albums(artist):
     try:
         # busca el artista en Spotify
         artist_info = sp.search(q='artist:' + artist, type='artist')
+        print(artist_info['artists']['href'])
         artist_id = artist_info['artists']['items'][0]['id']
+        artist_name = artist_info['artists']['items'][0]['name']
     except (spotipy.SpotifyException, IndexError) as e:
         print(f"No se pudo obtener información del artista {artist}: {e}")
         return []
@@ -80,6 +83,7 @@ def get_albums(artist):
         try:
             # obtener los álbumes del artista actual en el offset actual
             results = sp.artist_albums(artist_id, album_type='album,single', country='US', limit=limit, offset=offset)
+            print(results['href'])
         except spotipy.SpotifyException as e:
             print(f"No se pudieron obtener los álbumes de {artist}: {e}")
             return albums
@@ -97,6 +101,7 @@ def get_albums(artist):
         try:
             album = {}
             album_info = sp.album(item['id'])
+            print(album_info['href'])
 
             total_tracks = 0
             try:
@@ -118,23 +123,25 @@ def get_albums(artist):
             album['playtime'] = get_playtime(tracks)
             album['total_tracks'] = album_info['total_tracks']
             album['album_type'] = album_info['album_type']
-            album['popularity'] = album_info['popularity']
+            album['popularity'] = get_popularity_level(album_info['popularity'])
             # añadir más campos según tus necesidades
             albums.append(album)
 
         except spotipy.SpotifyException as e:
             print(f"No se pudo obtener información adicional para el álbum {album['name']}: {e}")
 
-    return albums
+    return (artist_name, albums)
 
 def get_artist_albums(artist_name):
     sp = spotipy.Spotify(auth=session.get('token'))
     artist = sp.search(q='artist:' + artist_name, type='artist')
+    print(artist['href'])
     if not artist['artists']['items']:
         return []
     artist_id = artist['artists']['items'][0]['id']
     albums = []
     results = sp.artist_albums(artist_id, album_type='album,single', country='US')
+    print(results['href'])
     albums.extend(results['items'])
     while results['next']:
         results = sp.next(results)
@@ -199,6 +206,7 @@ def get_playtime_pro(tracks):
         offset = 0
         while offset < total_tracks:
             results = sp.tracks(tracks[offset:offset+50])
+            print(results['href'])
             for track in results['tracks']:
                 playtime_ms += track['duration_ms']
             offset += 50
@@ -228,6 +236,7 @@ def get_user_spotify():
 
     sp = spotipy.Spotify(auth=token)
     user = sp.current_user()
+
     return user['display_name']
 
 def get_access_token(code):
@@ -322,62 +331,6 @@ def get_saved_albums():
     return albums_list
 
 
-
-def spotify_data_pull_old(album):
-    get_auth_url()
-
-    load_dotenv()
-    SPOTIFY_SECRET = os.getenv('SPOTIFY_SECRET')
-    SPOTIFY_ID = os.getenv('SPOTIFY_ID')
-    album_url_base = r'https://open.spotify.com/album/'
-    AUTH_URL = r'https://accounts.spotify.com/api/token'
-    album_get = 'https://api.spotify.com/v1/albums/{id}'
-
-    if "?" in album:
-        album = album[:album.find('?')]
-    id = album[album.find(album_url_base)+len(album_url_base):]
-
-    auth_response = requests.post(AUTH_URL, {
-    'grant_type': 'client_credentials',
-    'client_id': SPOTIFY_ID,
-    'client_secret': SPOTIFY_SECRET,
-    })
-
-    auth_response_data = auth_response.json()
-    access_token = auth_response_data['access_token']
-    headers = {
-        'Authorization': 'Bearer {token}'.format(token=access_token)
-    }
-
-    r = requests.get(album_get.format(id=id), headers=headers)
-    r = r.json()
-        
-    tracks = []
-    for i, track in enumerate(r['tracks']['items']):
-        if i == 30:
-            tracks.append("and more...")
-            break
-        tracks.append(track['name'])
-    
-    album_art = r['images'][0]['url']
-
-    data = {}
-    
-    data.update({'album_name': r['name']})
-    data.update({'album_artist': r['artists'][0]['name']})
-    data.update({'record' : r['label']})
-    data.update({'playtime' : get_playtime(r['tracks']['items'])})
-    data.update({'tracks' : tracks})
-    data.update({'album_art': album_art})
-    data.update({'album_type': r['album_type']})
-    data.update({'total_tracks': r['total_tracks']})
-    data.update({'label_tracks': 'canciones'})
-    data.update({'type': r['type']})
-    data.update({'copyright': r['copyrights'][0]['text']})
-    data.update({'release_date' : get_date(r['release_date'], '')})
-        
-    return data
-
 def spotify_data_pull(album):
     get_auth_url()
 
@@ -432,20 +385,22 @@ def spotify_data_pull(album):
     data.update({'total_tracks': total_tracks})
     data.update({'label_tracks': 'canciones'})
     data.update({'type': r['type']})
-    #data.update({'copyright': r['copyrights'][0]['text']})
+    data.update({'copyright': r['copyrights'][0]['text']})
     data.update({'release_date' : get_date(r['release_date'], '')})
+    data.update({'popularity' : get_popularity_level(r['popularity']) })
 
-        
     return data
 
 def get_all_tracks(album_id):
     sp = spotipy.Spotify(auth=session.get('token'))
 
     results = sp.album_tracks(album_id, limit=50)
+    print(results['href'])
     tracks = results['items']
 
     while results['next']:
         results = sp.next(results)
+        print(results['href'])
         tracks.extend(results['items'])
 
     return tracks
@@ -535,6 +490,25 @@ def dominant_colors(image):
     for index in np.argsort(counts)[::-1]:
         colors.append([int(code) for code in codes[index]])
     return colors                    # returns colors in order of dominance
+
+def get_popularity_level(popularity):
+    popularity_levels = {
+        (90, 100): {'en': 'Trending', 'es': 'Tendencia'},
+        (80, 90): {'en': 'Phenomenon', 'es': 'Fenómeno'},
+        (70, 80): {'en': 'Blockbuster', 'es': 'Exitazo'},
+        (60, 70): {'en': 'Hit', 'es': 'Éxito'},
+        (50, 60): {'en': 'Popular', 'es': 'Popular'},
+        (40, 50): {'en': 'Relevant', 'es': 'Relevante'},
+        (30, 40): {'en': 'Interesting', 'es': 'Interesante'},
+        (20, 30): {'en': 'Alternative', 'es': 'Alternativo'},
+        (10, 20): {'en': 'Underground', 'es': 'Underground'},
+        (0, 10): {'en': 'Unknown', 'es': 'Desconocido'}
+    }
+
+    for range_, level in popularity_levels.items():
+        if range_[0] <= popularity <= range_[1]:
+            return level['es']
+    return popularity
 
 
 def find_process_using_file(filename):

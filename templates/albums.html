@@ -1,36 +1,30 @@
-
 {% extends "layout.html" %}
-{% block body %}
-
-    <body>      
-        <h2>Spotify User Page {{ nombre_usuario }}</h2>
-        <br>
-    
+{% block content %}
+    {% if artist %}
+    <h2>{{ artist }}</h2>
+    {% endif %}
     <div class="album-grid">
         {% for album in albums %}
-            <div class="album {{ album.album_type }}">
-                <span>{{ album.popularity }}</span>
-                <a href="{{ url_for('card_result', album=album.album_link) }}">
-                    <img src="{{ album.album_art }}" alt="{{ album.album_name }}" onclick="showLoadingModal('{{ url_for('card_result', album=album.album_link)}}')">
+            <div class="album-box {{ album.album_type }}">
+                <a href="{{ url_for('card_result', album=album.album_link) }}" onclick="loading();">
+                    <img class="art" src="{{ album.album_art }}" alt="{{ album.album_name }}">
                 </a>
                 <div class="icons">
-                    <a href="{{ url_for('card_result', album=album.album_link, icon='vinyl.png') }}" onclick="showLoadingModal('{{ url_for('card_result', album=album.album_link, icon='vinyl.png')}}')">
+                    <a href="{{ url_for('card_result', album=album.album_link, icon='vinyl.png') }}" onclick="loading();" >
                         <img src="{{ url_for('static', filename='images/vinyl.png') }}" alt="Vinyl" class="icon">
                     </a>
-                    <a href="{{ url_for('card_result', album=album.album_link, icon='cd.png') }}" onclick="showLoadingModal('{{ url_for('card_result', album=album.album_link, icon='cd.png')}}')">
+                    <a href="{{ url_for('card_result', album=album.album_link, icon='cd.png') }}" onclick="loading();">
                         <img src="{{ url_for('static', filename='images/cd.png') }}" alt="CD" class="icon">
                     </a>
-                    <a href="{{ url_for('card_result', album=album.album_link, icon='cassette.png') }}" onclick="showLoadingModal('{{ url_for('card_result', album=album.album_link, icon='cassette.png')}}')">
+                    <a href="{{ url_for('card_result', album=album.album_link, icon='cassette.png') }}" onclick="loading();">
                         <img src="{{ url_for('static', filename='images/cassette.png') }}" alt="Cassette" class="icon">
                     </a>
                   </div>                  
                 <h3>{{ album.album_name }}</h3>
-                <p>{{ album.album_artist }}</p>
+                <h4>{{ album.album_artist }}</h4>
                 <span>{{ album.album_date }} - {{ album.playtime }} ({{ album.total_tracks }})</span>
+                <span>{{ album.popularity }}</span>
             </div>
         {% endfor %}
-    </div>      
-
-    
-    
+    </div>
 {% endblock %}

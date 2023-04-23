@@ -1,21 +1,18 @@
-
 {% extends "layout.html" %}
-{% block body %}
-        <form method="POST" action="/card">
-            <label for="album_input">Enter Spotify Album Link</label>
+{% block content %}
+        <form id="form-card" method="get" action="/card">
+            <label for="album_input">Spotify Album Link: </label>
             <input type="text" id="album_link" name="album_input">
-            <input type="submit" value="Submit">
+            <input type="submit" onclick="loading();" value="Submit">
         </form>
         <br>
-        
-        <form action="/login" method="post">
-            <button type="submit">Login with Spotify</button>
+        <form id="form-albums" action="/albums/" method="get">
+            <label for="album_search">Artist name:</label>
+            <input type="text" id="album_search" name="album_search">
+            <button type="submit" onclick="loading();">Buscar</button>
         </form>
-
-        <!--a href="{{ url_for('login') }}" class="btn-spotify">Log in with Spotify<img src="spotify-icon.png" alt="Spotify logo"></a>-->
-
-
         
-
-
+        <form id="form-login" action="/login" method="post">
+            <button type="submit" onclick="loading();">Login with Spotify</button>
+        </form>
 {% endblock %}
