@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 import os
 from flask import Flask, render_template, request, redirect, session, send_file
 import sys
+import logging
+import traceback
 
 load_dotenv()
 
@@ -27,9 +29,13 @@ def card_result():
         album_link = request.args.get('link')
         icon = request.args.get('icon')
         album = request.args.get('album')
+        album_input = request.args.get('album_input')
+        album_link = album_input
 
         if album:
             album_link = r'https://open.spotify.com/album/' + album
+
+        print(album_link)
 
         resolution = (5040, 3600, 3)
         card, album_name = generator(album_link, resolution, icon)
@@ -80,6 +86,7 @@ def my_albums():
             album_dict['total_tracks'] = album['total_tracks']
             album_dict['playtime'] = album['playtime']
             album_dict['album_type'] = album['album_type']
+            album_dict['popularity'] = album['popularity']
             albums.append(album_dict)
 
         type = request.args.get('type')
@@ -94,11 +101,12 @@ def my_albums():
     return render_template('albums.html')
 
 
-@app.route('/<string:artist>', methods=['POST', 'GET'])
+@app.route('/albums/<string:artist>', methods=['POST', 'GET'])
 def albums_artist(artist):
     if request.method == 'GET':
-        albums_result = get_albums(artist)  # variable para almacenar los resultados de get_albums()
+        artist_name, albums_result = get_albums(artist)  # variable para almacenar los resultados de get_albums()
         albums = []  # variable para almacenar los diccionarios creados dentro del bucle for
+        
         for album in albums_result:
                        
             album_dict = {}
@@ -111,19 +119,15 @@ def albums_artist(artist):
             album_dict['playtime'] = album['playtime']
             album_dict['album_type'] = album['album_type']
             album_dict['popularity'] = album['popularity']
-            print(album['popularity'])
             albums.append(album_dict)
      
         type = request.args.get('type')
         if type:
             albums = [album for album in albums if album['album_type'] == type]
 
-    return render_template('albums.html', albums=albums)
+        print(artist_name)
 
-@app.errorhandler(Exception)
-def handle_error(e):
-    logging.error(f"Unhandled exception: {e}")
-    return "An error occurred.", 500
+    return render_template('albums.html', albums=albums, artist=artist_name)
 
 
 if __name__ == '__main__':

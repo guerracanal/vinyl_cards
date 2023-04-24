@@ -6,12 +6,32 @@
         <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/album.css') }}" rel="stylesheet">
         <link href="{{ url_for('static', filename='css/icons.css') }}" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
         <meta charset="UTF-8">
     </head>
     <body>
         <h2>Vinyl Card Generator</h2>
-        {% block body %}
-
+        <div id="content">
+        {% block content %}
         {% endblock %}
+        </div>
+        <div id="loading"></div>
     </body>
+
+    <script type="text/javascript">// <![CDATA[
+        function loading(){
+            $("#loading").show();
+            $("#content").hide();       
+        }
+// ]]></script>
+
+    <script>
+        $(function() {
+            $('#form-albums').on('submit', function(event) {
+                event.preventDefault();
+                var albumName = $('#album_search').val();
+                window.location.href = '/albums/' + albumName;
+            });
+        });
+    </script>
 </html>

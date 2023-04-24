@@ -1,9 +1,6 @@
-
-        {% extends "layout.html" %}
-        {% block body %}
+{% extends "layout.html" %}
+{% block content %}
         <h2>Spotify User Page {{ nombre_usuario }}</h2>
         <br>
-
-        <a href="/my-albums">Saved Albums</a>
-
-        {% endblock %}
+        <a href="/my-albums" onclick="loading();">Saved Albums</a>
+{% endblock %}
