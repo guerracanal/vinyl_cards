@@ -16,8 +16,5 @@
       "FLASK_ENV": "production",
       "FLASK_APP": "app.py",
       "requirements": "requirements.txt"
-    },
-    "build": {
-        "command": "pip install -r requirements.txt && apt-get update  && xargs -a packages.txt apt-get install -y"
     }
   }
