@@ -17,4 +17,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 #EXPOSE 8080
 
 # Ejecutar el servidor Gunicorn
-CMD ["gunicorn", "app:app"]
+CMD ["gunicorn", "--config", "gunicorn_conf.py", "app:app"]
