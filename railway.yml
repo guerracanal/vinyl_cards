@@ -5,4 +5,4 @@ env:
 build:
   dockerfile: Dockerfile
 run:
-  web: gunicorn --config gunicorn_conf.py app:app
+  web: gunicorn --chdir /app  --bind 0.0.0.0:$PORT --config gunicorn_conf.py app:app
