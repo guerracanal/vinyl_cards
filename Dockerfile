@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Exponer el puerto 8080
-EXPOSE 8080
+#EXPOSE 8080
 
 # Ejecutar el servidor Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
+CMD ["gunicorn", "app:app"]
