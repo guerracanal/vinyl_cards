@@ -18,6 +18,6 @@
       "requirements": "requirements.txt"
     },
     "build": {
-        "command": "pip install -r requirements.txt && apt-get update && apt-get install -y --no-install-recommends $(cat packages.txt | xargs) && python -m spacy download en_core_web_sm"
+        "command": "pip install -r requirements.txt && apt-get update  && xargs -a packages.txt apt-get install -y"
     }
   }
