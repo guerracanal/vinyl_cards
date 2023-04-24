@@ -3,9 +3,7 @@
     "builds": [
       {
         "src": "app.py",
-        "use": "@vercel/python",
-        "buildCommand": "apt-get update && xargs -a packages.txt apt-get install -y"
-
+        "use": "@vercel/python"
       }
     ],
     "routes": [
@@ -18,5 +16,8 @@
       "FLASK_ENV": "production",
       "FLASK_APP": "app.py",
       "requirements": "requirements.txt"
+    },
+    "build": {
+        "command": "pip install -r requirements.txt && apt-get update && apt-get install -y --no-install-recommends $(cat packages.txt | xargs) && python -m spacy download en_core_web_sm"
     }
   }
