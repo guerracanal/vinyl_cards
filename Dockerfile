@@ -1,6 +1,10 @@
 # Imagen base para Python 3.9
 FROM python:3.9-slim-buster
 
+# Instalar paquete con sysctl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    procps \
+ && rm -rf /var/lib/apt/lists/*
 
 # Establecer límite de memoria
 RUN sysctl -w vm.max_map_count=262144
