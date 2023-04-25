@@ -1,0 +1,12 @@
+version: '1.0'
+name: vinyl-cards
+env:
+  PORT: 8080
+build:
+  dockerfile: Dockerfile
+services:
+  web:
+    image: vinyl-cards
+    environment:
+      - NODE_ENV=production
+    memory: 2GB
